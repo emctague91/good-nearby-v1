@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Good Nearby 🐾</title>
+<meta name="description" content="The local guide for dog people.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="paw">🐾</span><div><strong>GOOD NEARBY</strong><small>The local guide for dog people</small></div></div>
+  <button class="location-pill" id="locationBtn">📍 Chicago</button>
+</header>
+<main>
+<section class="hero">
+  <p class="eyebrow">CHICAGO • DOG LIFE, SIMPLIFIED</p>
+  <h1>What do you want<br><em>to do?</em></h1>
+  <div class="search-wrap"><span>⌕</span><input id="searchInput" placeholder="Search places, neighborhoods, or dog days..."></div>
+  <div class="chips" id="categoryChips"></div>
+</section>
+<section class="dog-day-banner">
+  <div><span class="sparkle">✨</span><div><p class="eyebrow">GOOD NEARBY'S SIGNATURE FEATURE</p><h2>Build a Dog Day</h2><p>Tell us the vibe. We'll connect the stops.</p></div></div>
+  <button class="primary" id="buildBtn">BUILD MY DOG DAY →</button>
+</section>
+<section class="section">
+  <div class="section-head"><div><p class="eyebrow">NEAR YOU</p><h2 id="resultsTitle">Good stuff nearby</h2></div><button class="text-btn" id="clearBtn">Reset</button></div>
+  <div class="cards" id="placeCards"></div>
+</section>
+<section class="section">
+  <div class="section-head"><div><p class="eyebrow">HAPPENING SOON</p><h2>Dog-friendly plans</h2></div></div>
+  <div class="event-grid" id="eventCards"></div>
+</section>
+</main>
+<nav class="bottom-nav">
+<button class="nav-item active" data-tab="home">🏠<span>Home</span></button>
+<button class="nav-item" data-tab="explore">🗺️<span>Explore</span></button>
+<button class="nav-item dogday" data-tab="dogday">🐾<span>Dog Day</span></button>
+<button class="nav-item" data-tab="saved">♡<span>Saved</span></button>
+<button class="nav-item" data-tab="profile">👤<span>Profile</span></button>
+</nav>
+<div class="modal hidden" id="dogDayModal">
+<div class="modal-card"><button class="close" id="closeModal">×</button>
+<p class="eyebrow">✨ BUILD A DOG DAY</p><h2>What's the vibe?</h2>
+<div class="vibe-grid" id="vibeGrid"></div>
+<label class="distance-label">How far? <span id="distanceValue">3 miles</span></label>
+<input type="range" id="distance" min="1" max="10" value="3">
+<button class="primary full" id="generateBtn">BUILD MY DAY →</button>
+<div id="dogDayResult"></div>
+</div></div>
+<div class="toast hidden" id="toast"></div>
+<script src="app.js"></script>
+</body></html>
