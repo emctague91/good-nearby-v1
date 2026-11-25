@@ -1,0 +1,12 @@
+{
+  "name": "good-nearby",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Good Nearby — The local guide for dog people",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "@netlify/database": "^2.0.1"
+  }
+}
