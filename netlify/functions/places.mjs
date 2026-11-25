@@ -1,4 +1,5 @@
 import { getDatabase } from "@netlify/database";
+import { NEARBY_MAX_MILES, REGIONAL_MAX_MILES, ZIP_PATTERN, rankByZip } from "../lib/zip-search.mjs";
 
 const db = getDatabase();
 
@@ -15,6 +16,23 @@ export default async function handler(request) {
     const category = url.searchParams.get("category");
     const neighborhood = url.searchParams.get("neighborhood");
     const query = url.searchParams.get("q")?.trim().toLowerCase();
+    const zip = url.searchParams.get("zip")?.trim();
+
+    if (zip !== undefined && !ZIP_PATTERN.test(zip)) {
+      return Response.json({ error: "zip must be a 5-digit ZIP code." }, { status: 400 });
+    }
+
+    let center = null;
+    if (zip) {
+      const [zipRow] = await db.sql`SELECT zip, latitude, longitude FROM zip_centroids WHERE zip = ${zip}`;
+      if (!zipRow) {
+        return Response.json({
+          data: [],
+          meta: { count: 0, zip, zip_found: false, message: "That ZIP code isn't in the Good Nearby service area yet." },
+        });
+      }
+      center = { latitude: zipRow.latitude, longitude: zipRow.longitude };
+    }
 
     // Keep the public API restricted to records explicitly reviewed for publication.
     const rows = await db.sql`
@@ -51,9 +69,22 @@ export default async function handler(request) {
       return true;
     });
 
+    // Only records reviewed as VERIFIED may be presented as verified dog access.
+    const withVerification = filtered.map((place) => ({ ...place, verified: place.access_confidence === "VERIFIED" }));
+    const data = center ? rankByZip(withVerification, zip, center) : withVerification;
+
     return Response.json({
-      data: filtered,
-      meta: { count: filtered.length, limit: 250 },
+      data,
+      meta: {
+        count: data.length,
+        limit: 250,
+        ...(center && {
+          zip,
+          zip_found: true,
+          center,
+          tiers: { IN: "same ZIP code", NEARBY: `within ${NEARBY_MAX_MILES} mi`, REGIONAL: `${NEARBY_MAX_MILES}–${REGIONAL_MAX_MILES} mi` },
+        }),
+      },
     }, {
       headers: {
         "cache-control": "public, max-age=30, stale-while-revalidate=60",
