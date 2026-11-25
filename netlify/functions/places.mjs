@@ -38,7 +38,7 @@ export default async function handler(request) {
     const rows = await db.sql`
       SELECT
         p.id, p.name, p.category, p.subcategory, p.description,
-        p.address, p.city, p.state, p.postal_code,
+        p.address, p.city, p.state, p.postal_code, p.managing_authority,
         p.latitude, p.longitude, p.dog_access, p.off_leash,
         p.leash_required, p.access_confidence, p.experience_tags,
         p.current_status, p.status_reason, p.normal_hours,
