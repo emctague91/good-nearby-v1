@@ -18,6 +18,30 @@ export default async function handler(request) {
     const query = url.searchParams.get("q")?.trim().toLowerCase();
     const zip = url.searchParams.get("zip")?.trim();
 
+    // Single published place for the detail page, including its source and verification fields.
+    const id = url.searchParams.get("id")?.trim();
+    if (id !== undefined) {
+      if (!id || id.length > 120) return Response.json({ error: "id is required." }, { status: 400 });
+      const [place] = await db.sql`
+        SELECT
+          p.id, p.name, p.category, p.subcategory, p.description,
+          p.address, p.city, p.state, p.postal_code, p.managing_authority,
+          p.latitude, p.longitude, p.dog_access, p.off_leash,
+          p.leash_required, p.access_confidence, p.experience_tags,
+          p.current_status, p.status_reason, p.normal_hours, p.seasonal,
+          p.source_name, p.source_url, p.source_notes, p.last_verified_at,
+          n.name AS neighborhood
+        FROM places p
+        LEFT JOIN neighborhoods n ON n.id = p.neighborhood_id
+        WHERE p.id = ${id} AND p.published = TRUE
+      `;
+      if (!place) return Response.json({ error: "Place not found." }, { status: 404 });
+      return Response.json(
+        { data: { ...place, verified: place.access_confidence === "VERIFIED" } },
+        { headers: { "cache-control": "public, max-age=30, stale-while-revalidate=60" } },
+      );
+    }
+
     if (zip !== undefined && !ZIP_PATTERN.test(zip)) {
       return Response.json({ error: "zip must be a 5-digit ZIP code." }, { status: 400 });
     }
@@ -38,7 +62,7 @@ export default async function handler(request) {
     const rows = await db.sql`
       SELECT
         p.id, p.name, p.category, p.subcategory, p.description,
-        p.address, p.city, p.state, p.postal_code,
+        p.address, p.city, p.state, p.postal_code, p.managing_authority,
         p.latitude, p.longitude, p.dog_access, p.off_leash,
         p.leash_required, p.access_confidence, p.experience_tags,
         p.current_status, p.status_reason, p.normal_hours,
